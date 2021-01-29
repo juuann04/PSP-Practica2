@@ -3,36 +3,49 @@ package Principal.PSP_Practica2;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.management.monitor.Monitor;
-
 public class App {
-	
-	static final int NUM_CONSUMERS = 100;
-	static final int NUM_PRODUCERS = 100;
-	static final int LOOPS = 1;
-	
+
+	private final static int productoresTotales = 10;
+	private final static int consumidoresTotales = 10;
+
 	public static void main(String[] args) {
-		
-		final Monitor monitor = new Monitor(28);
-		final TaskManager taskManager = new TaskManager();
-		List<Consumer> consumers = new ArrayList<>();
-		List<Producer> producers = new ArrayList<>();
 
-		for (int i = 0; i < NUM_CONSUMERS; i++) {
-			consumers.add(new Consumer(taskManager));
+		Monitor miMonitor = new Monitor();
+		List<Productor> miProductor = new ArrayList<Productor>();
+		List<Consumidor> miConsumidor = new ArrayList<Consumidor>();
+
+		for (int i = 0; i < productoresTotales; i++) {
+			miProductor.add(new Productor(i, miMonitor));
 		}
 
-		for (int i = 0; i < NUM_PRODUCERS; i++) {
-			producers.add(new Producer(taskManager));
+		for (int i = 0; i < consumidoresTotales; i++) {
+			miConsumidor.add(new Consumidor(i, miMonitor));
 		}
 
-		for (Consumer c : consumers) {
+		for (Consumidor c : miConsumidor) {
 			c.start();
 		}
-		
 
-		for (Producer p : producers) {
+		for (Productor p : miProductor) {
 			p.start();
 		}
+
+		for (Consumidor c : miConsumidor) {
+			try {
+				c.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		for (Productor p : miProductor) {
+			try {
+				p.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println(miMonitor);
+		System.out.println("Programa terminado");
 	}
 }
